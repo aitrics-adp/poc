@@ -1,0 +1,40 @@
+# Render.com Blueprint — Backend + Postgres
+# https://render.com/docs/blueprint-spec
+#
+# 1. https://render.com 가입 → GitHub 연동
+# 2. New → Blueprint → 이 리포 선택 → Apply
+# 3. 환경변수 VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY 입력 (sync: false)
+#    → 사전 생성: python3 backend/scripts/gen_vapid.py
+# 4. CORS_ORIGINS는 Vercel 배포 후 도메인 확정 시 추가
+
+services:
+  - type: web
+    name: tri-pro-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free   # starter $7로 변경 시 cold start 없음
+    healthCheckPath: /api/health
+    envVars:
+      - key: LLM_MODE
+        value: mock
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:tri-pro-poc@aitrics.com
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "https://tri-pro-patient.vercel.app,https://tri-pro-admin.vercel.app"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tri-pro-db
+          property: connectionString
+
+databases:
+  - name: tri-pro-db
+    plan: free
+    databaseName: tripro
+    user: tripro
