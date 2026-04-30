@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRI-PRO POC · 임상 통합 가이드</title>
+<style>
+  :root {
+    --bg: #fafafa; --panel: #fff; --fg: #1a202c; --muted: #6b7280;
+    --brand: #16a34a; --brand-soft: #dcfce7; --brand-dark: #14532d;
+    --red: #dc2626; --orange: #ea580c; --yellow: #ca8a04;
+    --purple: #7c3aed; --blue: #0284c7; --border: #e5e7eb;
+    --code-bg: #1e293b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard",
+                 "Apple SD Gothic Neo", system-ui, sans-serif;
+    line-height: 1.7; font-size: 15px;
+  }
+  .topbar {
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(8px);
+  }
+  .topbar a { color: var(--brand); text-decoration: none; font-size: 14px; }
+  .topbar a:hover { text-decoration: underline; }
+  .topbar .title { font-weight: 700; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 36px 24px 80px; }
+  h1 {
+    font-size: 30px; font-weight: 800; margin: 0 0 6px;
+    color: var(--brand-dark);
+  }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  h2 {
+    font-size: 20px; margin: 38px 0 12px;
+    border-bottom: 2px solid var(--brand-soft);
+    padding-bottom: 6px;
+  }
+  h2 .fn { font-size: 12px; color: var(--brand); font-weight: 500; margin-left: 8px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; color: var(--brand); }
+  p { margin: 8px 0; }
+  blockquote {
+    border-left: 4px solid var(--brand); margin: 14px 0;
+    padding: 10px 14px; background: var(--brand-soft);
+    border-radius: 0 8px 8px 0; color: var(--brand-dark);
+  }
+  blockquote.warn {
+    border-color: var(--orange); background: #fff7ed; color: #7c2d12;
+  }
+  blockquote.danger {
+    border-color: var(--red); background: #fef2f2; color: #7f1d1d;
+  }
+  pre {
+    background: var(--code-bg); color: #e2e8f0;
+    border-radius: 8px; padding: 14px 16px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.55;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px;
+         background: #f1f5f9; padding: 1px 6px; border-radius: 4px; }
+  pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px;
+           text-align: left; vertical-align: top; }
+  th { background: #f0fdf4; font-weight: 600; color: var(--brand-dark); }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 32px 0; }
+  ul, ol { margin: 8px 0; padding-left: 24px; }
+  li { margin: 4px 0; }
+  .toc {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px; margin: 24px 0;
+  }
+  .toc strong { display: block; margin-bottom: 8px; color: var(--brand); }
+  .toc a { color: var(--fg); text-decoration: none; display: block;
+           padding: 3px 0; font-size: 14px; }
+  .toc a:hover { color: var(--brand); }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; margin: 0 2px;
+  }
+  .pill.r { background: #fee2e2; color: var(--red); }
+  .pill.y { background: #fef3c7; color: var(--yellow); }
+  .pill.g { background: #dcfce7; color: var(--brand); }
+  .pill.b { background: #dbeafe; color: var(--blue); }
+  .pill.p0 { background: #fee2e2; color: #991b1b; }
+  .pill.p1 { background: #fef3c7; color: #92400e; }
+  .pill.p2 { background: #e5e7eb; color: #374151; }
+  .grade {
+    background: #16a34a; color: white; padding: 1px 7px;
+    border-radius: 4px; font-size: 10px; font-weight: 700;
+  }
+  .alg {
+    background: #1e293b; color: #e2e8f0;
+    padding: 14px 18px; border-radius: 8px;
+    font-family: "SF Mono", monospace; font-size: 12.5px;
+    margin: 12px 0;
+  }
+  .alg .k { color: #38bdf8; }
+  .alg .v { color: #a78bfa; }
+  .alg .c { color: #6b7280; font-style: italic; }
+  .twocol {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin: 12px 0;
+  }
+  .twocol > div {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  @media (max-width: 700px) {
+    .twocol { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">← 문서 인덱스</a>
+  <span style="margin: 0 12px; color: var(--muted);">|</span>
+  <span class="title">👨‍⚕️ 임상 통합 가이드</span>
+  <span style="float: right;">
+    <a href="features.html">일반용 →</a>
+    <a href="commands.html" style="margin-left: 12px;">명령어 →</a>
+  </span>
+</div>
+
+<div class="wrap">
+
+<h1>TRI-PRO POC · 임상 통합 가이드</h1>
+<p class="subtitle">
+  주치의·임상 자문 대상.
+  외래 워크플로 통합·PRO 도구 매트릭스·MCID 알고리즘·Pre-Visit Report 의사결정 분기·
+  가드레일 정책 정리. <a href="https://aitrics.atlassian.net/wiki/spaces/ADP/pages/1739390978">FSD §FN- ID</a> 인용.
+</p>
+
+<div class="toc">
+  <strong>📑 목차</strong>
+  <a href="#a">A. 임상 워크플로 통합</a>
+  <a href="#b">B. 탑재 PRO 도구 (5종)</a>
+  <a href="#c">C. 결정론 채점 알고리즘</a>
+  <a href="#d">D. MCID·Alert 정책</a>
+  <a href="#e">E. Pre-Visit Report 의사결정</a>
+  <a href="#f">F. PRO 도구 환자별 맞춤</a>
+  <a href="#g">G. 응답 수집 정책 (FN-FLEX)</a>
+  <a href="#h">H. LLM 가드레일</a>
+  <a href="#i">I. Audit·Compliance</a>
+  <a href="#j">J. POC 한계·MVP 전환 시 추가</a>
+</div>
+
+<h2 id="a">A. 임상 워크플로 통합</h2>
+
+<h3>외래 진료 24시간 전후 흐름</h3>
+<pre>D-2 03:00      Cron: Pre-Visit Report 사전계산 (FN-RPT-007)
+                ↓
+D-1 09:00      Cron: 3일 미응답 환자 푸시 (FN-EVENT-002)
+                Cron: MCID RED 환자 푸시 (FN-EVENT-001)
+                ↓
+D-Day  외래 5분 전
+                의사 → V.Doc Pro 어드민 → 담당 환자 모니터링
+                  - 🔴 RED 환자 우선 검토
+                  - One-Line Summary 1초 파악 (FN-RPT-010)
+                  - Pre-Visit Report 클릭 → 7일 추세 + Key Changes
+                ↓
+D-Day  진료 중
+                의사 → 일별 PRO 응답 상세로 환자 발화·점수 직접 확인
+                의사 → 처방 후 PRO Config 미세조정 (예: 신경병증 빈도↑)
+                ↓
+D+1            환자앱 → "PRO 응답해주세요" 푸시 (의사 수동 트리거 또는 cron)
+                Quick Mode로 환자 응답 (2~3분)
+                결정론 채점 즉시 → 다음 외래 D+30 데이터 누적</pre>
+
+<h3>외래 시간 절감</h3>
+<table>
+  <tr><th></th><th>기존</th><th>TRI-PRO 도입 후</th></tr>
+  <tr><td>"지난주 어떠셨어요?"</td><td>2~3분 환자 회상</td><td>Pre-Visit Report 1줄</td></tr>
+  <tr><td>증상 강도 정량화</td><td>주관적 표현</td><td>PRO-CTCAE 0~4 점수</td></tr>
+  <tr><td>이전 회 비교</td><td>차트 뒤져 확인</td><td>7일 추세 그래프</td></tr>
+  <tr><td>이상 신호 누락 위험</td><td>의사 기억·환자 호소 의존</td><td>MCID RED 자동 alert</td></tr>
+</table>
+
+<h2 id="b">B. 탑재 PRO 도구 (5종)</h2>
+
+<table>
+  <tr>
+    <th>도구</th><th>측정 영역</th><th>문항</th><th>소요</th>
+    <th>Evidence</th><th>License</th><th>POC</th>
+  </tr>
+  <tr>
+    <td><strong>PRO-CTCAE</strong></td>
+    <td>항암 부작용 (5증상 × 빈도/강도/일상)</td>
+    <td>가변 (핵심 13)</td>
+    <td>3~5분</td>
+    <td><span class="grade">A</span></td>
+    <td>NCI 무료</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td><strong>HADS</strong></td>
+    <td>불안 7 + 우울 7</td>
+    <td>14</td>
+    <td>3~4분</td>
+    <td><span class="grade">A</span></td>
+    <td>공개</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td><strong>FACT-C</strong></td>
+    <td>대장암 QoL (PWB·SWB·EWB·FWB·CCS)</td>
+    <td>36</td>
+    <td>6~8분</td>
+    <td><span class="grade">A</span></td>
+    <td>FACIT.org</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td><strong>FACIT-F</strong></td>
+    <td>암성 피로 (Fatigue Subscale)</td>
+    <td>13</td>
+    <td>2~3분</td>
+    <td><span class="grade">A</span></td>
+    <td>FACIT.org</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td><strong>PSQI</strong></td>
+    <td>수면의 질 (7 컴포넌트)</td>
+    <td>19</td>
+    <td>5분</td>
+    <td><span class="grade">A</span></td>
+    <td>공개</td>
+    <td>✅</td>
+  </tr>
+</table>
+
+<h3>PRO-CTCAE 핵심 5증상</h3>
+<table>
+  <tr><th>증상</th><th>빈도</th><th>강도</th><th>일상 방해</th></tr>
+  <tr><td>피로 (fatigue)</td><td>0~4</td><td>0~4</td><td>0~4</td></tr>
+  <tr><td>식욕부진 (appetite)</td><td>0~4</td><td>—</td><td>0~4</td></tr>
+  <tr><td>오심·구토 (nausea)</td><td>0~4</td><td>0~4</td><td>0~4</td></tr>
+  <tr><td>설사 (diarrhea)</td><td>0~4</td><td>—</td><td>—</td></tr>
+  <tr><td>말초신경병증 (neuropathy)</td><td>—</td><td>0~4</td><td>0~4</td></tr>
+</table>
+<p>각 항목 0=없음 / 1=드물게·약함 / 2=가끔·보통 / 3=자주·심함 / 4=거의·매우심함.</p>
+
+<h3>도구 라이브러리 노출 정책</h3>
+<ul>
+  <li>의사가 환자 PRO Config 진입 시 5종 도구 모두 카드로 노출</li>
+  <li>각 도구 카드 클릭 → 실제 문항 + 5단계 라벨 미리보기</li>
+  <li>환자 화면 미리보기 (iframe) 기능으로 응답 부담 직접 체감</li>
+</ul>
+
+<h2 id="c">C. 결정론 채점 알고리즘 <span class="fn">FN-PRO-006</span></h2>
+
+<blockquote><strong>원칙</strong>: 동일 입력 → 동일 출력 100%. LLM 미관여. 모든 역채점·결측·합산 룰을 명시 코드로 구현.</blockquote>
+
+<h3>PRO-CTCAE 채점</h3>
+<div class="alg"><span class="c"># 항목별 채점 — 합산하지 않고 분포 보존</span>
+score_pro_ctcae_item(symptom, attribute, raw):
+    <span class="k">return</span> {
+        <span class="v">"symptom"</span>: symptom,
+        <span class="v">"attribute"</span>: attribute,
+        <span class="v">"score"</span>: raw,                           <span class="c"># 0..4</span>
+        <span class="v">"severity_grade"</span>: ["none","mild",
+            "moderate","severe","very_severe"][raw],
+    }
+
+<span class="c"># Composite — max(강도, 일상) — alert용</span>
+score_pro_ctcae_composite(items):
+    relevant = [i.score <span class="k">for</span> i <span class="k">in</span> items
+        <span class="k">if</span> i.attribute <span class="k">in</span> (<span class="v">"severity"</span>, <span class="v">"interference"</span>)]
+    <span class="k">return</span> {<span class="v">"composite"</span>: max(relevant)}</div>
+
+<h3>HADS 채점</h3>
+<div class="alg"><span class="c"># 14문항 → A·D 분리 + 역채점 7개 적용</span>
+HADS_REVERSE = {0:3, 1:2, 2:1, 3:0}
+HADS_ITEMS_REVERSE = ["D1","D2","D3","A4","D5","D6","D7"]
+
+score_hads_subscale(responses, sub):
+    total = 0
+    <span class="k">for</span> code, reversed_ <span class="k">in</span> items_of(sub):
+        raw = responses[code]
+        adjusted = HADS_REVERSE[raw] <span class="k">if</span> reversed_ <span class="k">else</span> raw
+        total += adjusted
+
+    classification = (
+        <span class="v">"normal"</span>     <span class="k">if</span> total ≤ 7
+        <span class="k">else</span> <span class="v">"borderline"</span> <span class="k">if</span> total ≤ 10
+        <span class="k">else</span> <span class="v">"case"</span>
+    )
+    <span class="k">return</span> {<span class="v">"value"</span>: total, <span class="v">"classification"</span>: classification}</div>
+
+<h3>FACT-C / FACIT-F / PSQI</h3>
+<ul>
+  <li><strong>FACT-C</strong>: 5 서브스케일(PWB 7·SWB 7·EWB 6·FWB 7·CCS 9) → 결측 50% 이상 시 평균 보정 → TOI = PWB+FWB+CCS, FACT-G = PWB+SWB+EWB+FWB</li>
+  <li><strong>FACIT-F</strong>: 13문항 합 (0..52). 점수 ≤30 = severe, 31~43 = moderate, ≥44 = normal. MCID 3점.</li>
+  <li><strong>PSQI</strong>: 7 컴포넌트 합 (0..21). ≥5 = poor sleep, ≥10 = severe.</li>
+</ul>
+
+<h2 id="d">D. MCID·Alert 정책</h2>
+
+<h3>PRO-CTCAE — 지속성 기반</h3>
+<div class="alg">evaluate_mcid_pro_ctcae(scores, history,
+    red_threshold=2, persist_days=2):
+
+    today_max = max(s.score <span class="k">for</span> s <span class="k">in</span> scores)
+
+    <span class="c"># 직전 N일 모두 ≥ 임계값 → RED 확정</span>
+    <span class="k">if</span> today_max ≥ red_threshold <span class="k">and</span>
+       len(history) ≥ persist_days <span class="k">and</span>
+       all(h ≥ red_threshold <span class="k">for</span> h <span class="k">in</span> history[-persist_days:]):
+        <span class="k">return</span> <span class="v">"red"</span>
+
+    <span class="k">if</span> today_max ≥ red_threshold:
+        <span class="k">return</span> <span class="v">"yellow"</span>
+    <span class="k">return</span> None</div>
+
+<h3>HADS — Cutoff 기반</h3>
+<table>
+  <tr><th>점수 범위</th><th>분류</th><th>Alert flag</th></tr>
+  <tr><td>≤ 7</td><td>Normal</td><td>—</td></tr>
+  <tr><td>8 ~ 10</td><td>Borderline</td><td><span class="pill y">YELLOW</span></td></tr>
+  <tr><td>≥ 11</td><td>Case</td><td><span class="pill r">RED</span></td></tr>
+</table>
+<p>임계값은 환자별 PatientProConfig.threshold_hads_yellow / threshold_hads_red로 조정 가능. 정신과 협진 우선 환자는 9·10 등으로 보수화 권장.</p>
+
+<h3>FACT-C / FACIT-F / PSQI MCID</h3>
+<table>
+  <tr><th>도구</th><th>MCID 변화량</th><th>RED 기준</th></tr>
+  <tr><td>FACT-C 서브스케일 (PWB/SWB/EWB/FWB)</td><td>2점 (Cella 2002)</td><td>1.5×MCID 이상 감소</td></tr>
+  <tr><td>FACT-C TOI</td><td>5점</td><td>1.5×MCID 이상 감소</td></tr>
+  <tr><td>FACT-C Total</td><td>7점</td><td>1.5×MCID 이상 감소</td></tr>
+  <tr><td>FACIT-F</td><td>3점</td><td>≤30 절대값</td></tr>
+  <tr><td>PSQI</td><td>—</td><td>≥10 절대값 / ≥5 = YELLOW</td></tr>
+</table>
+
+<h2 id="e">E. Pre-Visit Report 의사결정 분기 <span class="fn">FN-RPT-008·010</span></h2>
+
+<h3>One-Line Summary 자동 생성 룰</h3>
+<div class="alg"><span class="k">if</span> len(red_alerts) ≥ 2:
+    <span class="k">return</span> <span class="v">"{n}개 영역 RED — 즉시 외래 또는 전화 진료 권고."</span>
+
+<span class="k">elif</span> red_alert is HADS:
+    <span class="k">return</span> <span class="v">"HADS-{sub} {value}점 — 임상적 이상. 전문 상담 의뢰 검토."</span>
+
+<span class="k">elif</span> red_alert is PRO-CTCAE:
+    sym = red_alert.subscale  <span class="c"># neuropathy/fatigue/nausea/appetite/diarrhea</span>
+    <span class="k">return</span> 도구별 전용 템플릿 (예: <span class="v">"말초신경병증 7일 연속 3점 지속."</span>)
+
+<span class="k">elif</span> yellow_alerts:
+    <span class="k">return</span> <span class="v">"HADS-{sub} {value}점 진입 (경계값). 정서적 지지 권장."</span>
+
+<span class="k">else</span>:
+    <span class="k">return</span> <span class="v">"지난 {days}일간 PRO 점수 안정적. 특이 변화 없음."</span></div>
+
+<h3>의사결정 우선순위 트리</h3>
+<pre>┌─ Pre-Visit Report 진입
+│
+├─ One-Line Summary 1초 파악
+│   ├─ "다중 영역 RED" → 외래·전화 즉시
+│   ├─ "신경병증 N일 연속" → 신경독성 평가 / 용량 조정 검토
+│   ├─ "HADS 11점 case" → 정신과 협진
+│   └─ "안정적" → 통상 진료
+│
+├─ Key Changes 카드로 RED/YELLOW 도구·점수 확인
+├─ 7일 추세 차트 (PRO-CTCAE neuropathy + HADS-A 오버레이)
+├─ 라이프로그 대조 (활동량·체중·식이 — Pearson r)
+├─ 이수율 (응답 횟수 / 예상 + 미응답 일수)
+│
+└─ 일별 PRO 응답 상세 클릭 → 환자 발화·원 점수 추적</pre>
+
+<blockquote class="warn"><strong>중요</strong>: One-Line Summary는 LLM이 만들지 않습니다. 결정론 템플릿 9종 매칭으로 100% 재현 가능. LLM 리라이트는 Phase 1+에서 옵션으로 추가 예정 (audit 의무).</blockquote>
+
+<h2 id="f">F. PRO 도구 환자별 맞춤 <span class="fn">FN-CUST-001~005</span></h2>
+
+<h3>ICD-10 + 나이 기반 자동 추천</h3>
+<table>
+  <tr><th>ICD-10</th><th>나이</th><th>필수 도구</th><th>선택 도구</th><th>비고</th></tr>
+  <tr>
+    <td>C18~C21 (대장·직장)</td><td>&lt; 75세</td>
+    <td>PRO-CTCAE / HADS / <strong>FACT-C</strong></td>
+    <td>FACIT-F / PSQI</td><td>FACT-C 필수</td>
+  </tr>
+  <tr>
+    <td>C18~C21</td><td>≥ 75세 (어르신)</td>
+    <td>PRO-CTCAE / HADS</td>
+    <td>FACT-C / FACIT-F / PSQI</td>
+    <td>FACT-C 부담 감소 위해 선택으로</td>
+  </tr>
+  <tr>
+    <td>C34 (폐)</td><td>—</td>
+    <td>PRO-CTCAE / HADS</td>
+    <td>FACIT-F / PSQI</td>
+    <td>면역항암제 피로 추적</td>
+  </tr>
+  <tr>
+    <td>C16 (위)</td><td>≤ 50세</td>
+    <td>PRO-CTCAE / HADS (주 1회)</td>
+    <td>FACT-C / FACIT-F / PSQI</td>
+    <td>젊은 환자 정서 강화</td>
+  </tr>
+  <tr>
+    <td>C50 (유방)</td><td>—</td>
+    <td>PRO-CTCAE / HADS</td>
+    <td>FACIT-F / PSQI</td>
+    <td>호르몬 부작용 추적</td>
+  </tr>
+</table>
+
+<h3>의사 커스터마이징 가능 항목</h3>
+<ol>
+  <li><strong>도구 ON/OFF</strong> — 필수 도구는 잠금, 선택 도구는 자유</li>
+  <li><strong>증상×속성 매트릭스</strong> — PRO-CTCAE 5×3 체크박스</li>
+  <li><strong>HADS 서브스케일</strong> — A·D 각각 ON/OFF</li>
+  <li><strong>도구별 빈도</strong> — daily/3일/주1회/월1회/사이클</li>
+  <li><strong>임계값 4종</strong>
+    <ul>
+      <li>PRO-CTCAE RED 점수 (1..4)</li>
+      <li>PRO-CTCAE 지속 일수 (1..7)</li>
+      <li>HADS YELLOW (0..21)</li>
+      <li>HADS RED (0..21)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>커스텀 PRO 세트 (재사용 템플릿)</h3>
+<p>의사가 "FOLFOX Cycle D14 추적"·"면역항암제 1차 평가" 등 자주 쓰는 도구 조합을 명명·저장 후 1클릭으로 환자에게 적용. 커스텀 문항 추가 가능 (예: "찬물 닿을 때 얼얼함이 있었나요? 예/아니오").</p>
+
+<h2 id="g">G. 응답 수집 정책 (FN-FLEX) <span class="fn">FN-FLEX-001~009</span></h2>
+
+<h3>3가지 응답 모드</h3>
+<table>
+  <tr><th>모드</th><th>소요</th><th>적용 시점</th><th>FN-ID</th></tr>
+  <tr><td><strong>Full</strong></td><td>5~10분</td><td>월 1회 의무 + 임상 이벤트 시</td><td>FN-FLEX-001</td></tr>
+  <tr><td><strong>Quick</strong></td><td>2~3분</td><td>5개 카테고리 스크리닝 → 양성만 세부</td><td>FN-FLEX-002·003</td></tr>
+  <tr><td><strong>No-Change</strong></td><td>15초</td><td>"어제와 같음" — 직전 Full 응답 자동 승계</td><td>FN-FLEX-004·005</td></tr>
+</table>
+
+<h3>가드 정책</h3>
+<table>
+  <tr><th>조건</th><th>강제 동작</th><th>FN-ID</th></tr>
+  <tr><td>마지막 Full 후 30일 경과</td><td>Full 강제 (Carry-Over 만료)</td><td>FN-FLEX-008</td></tr>
+  <tr><td>No-Change 연속 3회 사용</td><td>Full/Quick 강제 전환</td><td>FN-FLEX-007</td></tr>
+  <tr><td>월 1회 Full 미달</td><td>Full 트리거 (의무화)</td><td>FN-FLEX-006</td></tr>
+  <tr><td>임상 이벤트 발생</td><td>Full 강제 (Carry-Over 비활성)</td><td>FN-FLEX-009</td></tr>
+</table>
+
+<blockquote>임상 시험 PRO 데이터의 응답률이 50% 미만이면 분석 제외. 3단 모드는 환자 피로 ↓ + 응답률 ↑ + 데이터 신뢰도 유지를 동시에.</blockquote>
+
+<h2 id="h">H. LLM 가드레일 <span class="fn">FN-LLM-005~011</span></h2>
+
+<h3>분기 우선순위 (Top-down)</h3>
+<pre>1. PII 마스킹 (FN-LLM-011)
+   - 휴대폰·주민번호·이메일·이름 자동 redact
+   - audit log·LLM 호출 모두 redacted text만 사용
+        ↓
+2. 응급 키워드 12개 (FN-LLM-008)
+   - "숨이 안 쉬어져요", "쓰러질 것 같아요" 등 사전 매칭
+   - 매칭 시 즉시 takeover (SLA &lt; 200ms)
+   - 119/응급실 전화 큰 버튼 + 보호자 호출
+        ↓
+3. Out-of-Scope 패턴 20개 (FN-LLM-007)
+   - "약 더 먹어도?", "용량 늘려도?" 등 진단·처방·복용량
+   - 고정 응답: "주치의 상담이 필요해요"
+   - 100% 차단 (POC KPI 검증)
+        ↓
+4. Education 카드 (FN-LLM-006)
+   - "손발이 저려요" → 신경병증 관리 카드 (ASCO Guideline)
+   - "피곤해요" → 암성 피로 카드 (NCCN Guideline)
+   - 모든 카드에 source citation 자동 (FN-LLM-009)
+        ↓
+5. 정상 발화 (FN-LLM-005)
+   - Mock 모드: 결정론 템플릿 6종 (deterministic 선택)
+   - Real 모드: Anthropic API 호출 (가드레일 통과 후)
+   - 모든 응답에 의료자문 면책 footer 자동 부착</pre>
+
+<h3>응급 키워드 12개</h3>
+<p>"숨이 안 쉬", "피가 나", "가슴이 너무 아", "쓰러질 것 같", "쓰러졌", "의식이 없", "심하게 어지러", "토할 것 같", "심장이 빨라", "기절할 것", "응급실"</p>
+
+<h3>Out-of-Scope 20개 (대표)</h3>
+<p>"약 더 먹", "복용량", "처방", "약 바꿔", "용량 늘", "끊어도 되", "재발했", "전이됐", "수술해야", "내 병명", "진단", "예후", "치료법" 등</p>
+
+<blockquote class="danger"><strong>임상적으로 중요</strong>: LLM 단독 응답을 신뢰하면 안 됨. 응급·처방·진단 영역은 LLM이 어떻게 답하든 사전 필터로 차단됨. POC는 Mock 모드라 LLM 호출이 0건이지만, Real 모드로 전환해도 동일 가드레일이 작동.</blockquote>
+
+<h2 id="i">I. Audit · Compliance <span class="fn">FN-AUDIT, FN-CUST-008</span></h2>
+
+<h3>자동 기록되는 이벤트</h3>
+<table>
+  <tr><th>이벤트</th><th>저장 위치</th><th>보관</th></tr>
+  <tr><td>PRO Config 변경</td><td>ProSetAuditLog (before/after JSON)</td><td>7년 (식약처 권고)</td></tr>
+  <tr><td>LLM 발화·응답</td><td>LlmAudit (PII redacted)</td><td>7년</td></tr>
+  <tr><td>PRO 응답·점수</td><td>ProResponse·ProScore (append-only)</td><td>영구</td></tr>
+  <tr><td>Push 발송 결과</td><td>send_push 반환값</td><td>로그</td></tr>
+</table>
+
+<h3>변경 이력 가시화</h3>
+<p>JSON diff을 사람이 읽을 수 있는 이벤트로 자동 변환:</p>
+<ul>
+  <li>✅ 활성화 / ❌ 비활성화</li>
+  <li>➕ 추가 / ➖ 제거</li>
+  <li>🔄 빈도 변경 (예: 매일 → 주 1회)</li>
+  <li>🔧 임계값 변경 (예: HADS RED 11 → 8)</li>
+  <li>📚 ICD-10 기본값 적용</li>
+  <li>📋 커스텀 세트 적용</li>
+</ul>
+
+<h3>재현성 보장</h3>
+<ol>
+  <li>모든 채점은 결정론 알고리즘 — 같은 입력·같은 임계값 = 같은 결과</li>
+  <li>임계값 변경 시점이 audit으로 기록되어 "그 시점 어떤 임계값으로 어떤 결과가 나왔나" 추적 가능</li>
+  <li>ProResponse·ProScore는 append-only — 수정·삭제 불가</li>
+  <li>LLM 응답은 Mock 모드면 deterministic, Real 모드여도 prompt + response 모두 audit</li>
+</ol>
+
+<h2 id="j">J. POC 한계 · MVP 전환 시 추가 예정</h2>
+
+<h3>POC 미구현 (의도적)</h3>
+<table>
+  <tr><th>항목</th><th>POC 상태</th><th>MVP 시 추가</th></tr>
+  <tr><td>휴대폰 본인인증 (FN-AUTH-001)</td><td>미구현 (시연용)</td><td>통신사 OTP API</td></tr>
+  <tr><td>보호자 가입 (FN-AUTH-002)</td><td>미구현</td><td>보호자 매칭 승인 워크플로</td></tr>
+  <tr><td>음성 STT (FN-PRO-004)</td><td>미구현</td><td>Whisper 또는 자체 ASR</td></tr>
+  <tr><td>RAG 기반 Education (FN-LLM-006)</td><td>정적 카드 4개</td><td>벡터 DB + 의학 가이드라인</td></tr>
+  <tr><td>Hallucination 모니터링 (FN-LLM-010)</td><td>미구현</td><td>월 5% 의료진 검수 + Drift Detection</td></tr>
+  <tr><td>식약처 CSV Export (FN-AUDIT-005)</td><td>미구현</td><td>표준 포맷 export</td></tr>
+  <tr><td>다중 환자 등록</td><td>합성 5명 시드</td><td>EMR 연동 + 환자 관리</td></tr>
+</table>
+
+<h3>POC 도구 제한</h3>
+<ul>
+  <li>현재 PRO-CTCAE 5증상만 (기획서 핵심 7증상 중 통증·발열 미탑재)</li>
+  <li>FACT-C 한국어 번역본 미검증 (위키 §4.4 PI 검토 필요)</li>
+  <li>PSQI 채점 알고리즘 간소화 버전 (C4 컴포넌트 시간 비율 계산 생략)</li>
+  <li>Real LLM 모드 미테스트 (Mock만 검증 — Anthropic API 키 미설정)</li>
+</ul>
+
+<h3>MVP 전환 시 임상 검토 필요 영역</h3>
+<ol>
+  <li><strong>MCID 임계값 confirmation</strong> — 도구별 한국 항암 환자 데이터 기반 검증 필요 (현재 미국 기준 적용)</li>
+  <li><strong>FACT-C 한국어 번역</strong> — 임상 검증된 한국어판 도입 (한국어 FACT-C 번역본 존재)</li>
+  <li><strong>응급 키워드 확장</strong> — 12개 → 의료진 자문으로 50개 이상</li>
+  <li><strong>Out-of-Scope 패턴</strong> — 한국 환자 발화 데이터 수집 후 패턴 보강</li>
+  <li><strong>One-Line Summary 템플릿</strong> — 의사 자문으로 9개 → 30개 이상 (도구·증상 조합)</li>
+  <li><strong>라이프로그 상관 분석</strong> — 현재 더미 텍스트, MVP는 활동량 API 연동</li>
+</ol>
+
+<hr>
+
+<h3>임상 자문 요청 항목</h3>
+<ol>
+  <li>현재 자동 추천 5개 ICD-10 매핑이 한국 임상 실제와 부합하는지</li>
+  <li>HADS 임계값 8/11이 한국 항암 환자에게 적정한지 (서양 기준)</li>
+  <li>Pre-Visit Report One-Line Summary 9개 템플릿이 외래 의사결정에 충분한지</li>
+  <li>응급 키워드 12개가 임상적으로 충분히 강건한지</li>
+  <li>어르신 모드 얼굴 척도 5단계 라벨이 한국 어르신에게 자연스러운지</li>
+</ol>
+
+<p style="text-align: center; color: var(--muted); font-size: 12px; margin-top: 30px;">
+  본 가이드는 임상 자문·주치의 검토용입니다.<br>
+  비전공자용 안내는 <a href="features.html">일반 안내서</a> 참고.<br>
+  상세 사양: <a href="https://aitrics.atlassian.net/wiki/spaces/ADP/pages/1739390978">FSD §FN- ID 인용</a>
+</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRI-PRO POC · 시연 투어</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --fg: #e2e8f0; --muted: #94a3b8;
+    --brand: #38bdf8; --green: #22c55e; --orange: #f97316;
+    --red: #dc2626; --purple: #a78bfa; --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard",
+                 "Apple SD Gothic Neo", system-ui, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  header a {
+    color: var(--brand); text-decoration: none; font-size: 13px;
+  }
+  header .title { font-weight: 700; font-size: 14px; }
+  header .progress {
+    flex: 1; height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 3px; overflow: hidden;
+  }
+  header .progress > div {
+    height: 100%; background: linear-gradient(90deg, var(--brand), var(--purple));
+    transition: width 0.3s ease; width: 0%;
+  }
+  header .step-num { font-size: 12px; color: var(--muted); min-width: 60px; text-align: right; }
+
+  .iframes {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 8px;
+    padding: 8px;
+    background: #0a0e1a;
+    overflow: hidden;
+  }
+  .iframe-box {
+    background: white; border-radius: 8px; overflow: hidden;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border);
+  }
+  .iframe-label {
+    background: var(--panel); color: var(--muted);
+    padding: 4px 12px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .iframe-label .url {
+    color: var(--brand); font-family: monospace;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 60%;
+  }
+  .iframe-label.active { background: rgba(56, 189, 248, 0.15); color: var(--brand); }
+  .iframe-box iframe { flex: 1; width: 100%; border: 0; background: white; }
+
+  footer {
+    background: var(--panel); border-top: 1px solid var(--border);
+    padding: 14px 18px;
+  }
+  .toast-content {
+    margin-bottom: 12px;
+  }
+  .toast-content .kind {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .kind.info    { background: rgba(56, 189, 248, 0.2); color: var(--brand); }
+  .kind.action  { background: rgba(168, 139, 250, 0.2); color: var(--purple); }
+  .kind.result  { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+  .kind.warning { background: rgba(249, 115, 22, 0.2); color: var(--orange); }
+  .kind.error   { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+  .toast-content .title-text {
+    font-size: 16px; font-weight: 700; margin-bottom: 4px;
+  }
+  .toast-content .desc {
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+  }
+
+  .controls {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .controls button {
+    background: var(--panel); color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+  }
+  .controls button:hover { border-color: var(--brand); }
+  .controls button.primary {
+    background: linear-gradient(135deg, var(--brand), var(--purple));
+    border: none; color: white;
+  }
+  .controls button:disabled {
+    opacity: 0.4; cursor: not-allowed;
+  }
+  .controls .auto {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12px;
+  }
+  .controls .spacer { flex: 1; }
+
+  /* URL 설정 모달 */
+  .modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .modal.hide { display: none; }
+  .modal-box {
+    background: var(--panel); border-radius: 16px;
+    padding: 28px 32px; max-width: 480px; width: 92%;
+    border: 1px solid var(--border);
+  }
+  .modal-box h2 { margin: 0 0 8px; font-size: 18px; }
+  .modal-box p { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+  .modal-box label {
+    display: block; font-size: 11px; color: var(--muted);
+    margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px;
+    margin-top: 12px;
+  }
+  .modal-box input {
+    width: 100%; padding: 10px 12px;
+    background: rgba(0,0,0,0.3); color: var(--fg);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: monospace; font-size: 12px;
+  }
+  .modal-box .actions {
+    display: flex; gap: 8px; margin-top: 18px;
+  }
+  .modal-box button {
+    flex: 1; padding: 10px;
+    background: linear-gradient(135deg, var(--brand), var(--purple));
+    color: white; border: 0; border-radius: 8px;
+    font-weight: 700; cursor: pointer; font-size: 13px;
+  }
+  .modal-box button.secondary {
+    background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+  }
+  .modal-box .preset {
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--brand); font-size: 11px; padding: 8px 10px;
+    border-radius: 6px; cursor: pointer; margin-top: 8px;
+    font-family: monospace; text-align: center;
+  }
+  .modal-box .preset:hover { background: rgba(56, 189, 248, 0.2); }
+
+  @media (max-width: 800px) {
+    .iframes { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- URL 설정 모달 (첫 진입 또는 ⚙ 버튼) -->
+<div class="modal hide" id="modal">
+  <div class="modal-box">
+    <h2>🌐 시연 환경 URL 설정</h2>
+    <p>로컬 또는 배포된 서버 URL을 입력하세요. 한 번 저장하면 다음부터 자동.</p>
+
+    <div class="preset" id="preset-local">
+      💻 로컬: http://localhost:3000 / 3001 / 8000
+    </div>
+
+    <label>환자앱 URL</label>
+    <input id="patient-url" placeholder="https://patient.example.com" />
+    <label>의료진 어드민 URL</label>
+    <input id="admin-url" placeholder="https://admin.example.com" />
+    <label>API URL (선택)</label>
+    <input id="backend-url" placeholder="https://api.example.com" />
+
+    <div class="actions">
+      <button class="secondary" onclick="closeModal()">취소</button>
+      <button onclick="saveAndStart()">저장 + 시작</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <a href="index.html">← 인덱스</a>
+  <span style="color: var(--border);">|</span>
+  <span class="title">🎬 TRI-PRO 시연 투어</span>
+  <div class="progress"><div id="progress-bar"></div></div>
+  <span class="step-num" id="step-num">0 / 0</span>
+  <button onclick="openModal()" style="background: transparent; border: 1px solid var(--border); color: var(--fg); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px;">⚙ URL</button>
+</header>
+
+<div class="iframes">
+  <div class="iframe-box" id="patient-box">
+    <div class="iframe-label">
+      <span>📱 환자앱</span>
+      <span class="url" id="patient-current">—</span>
+    </div>
+    <iframe id="patient-iframe" name="patient" src="about:blank"></iframe>
+  </div>
+  <div class="iframe-box" id="admin-box">
+    <div class="iframe-label">
+      <span>💻 의료진 어드민</span>
+      <span class="url" id="admin-current">—</span>
+    </div>
+    <iframe id="admin-iframe" name="admin" src="about:blank"></iframe>
+  </div>
+</div>
+
+<footer>
+  <div class="toast-content">
+    <span class="kind info" id="kind-pill">시작</span>
+    <div class="title-text" id="step-title">시연 투어 준비 중...</div>
+    <div class="desc" id="step-desc">
+      ⚙ URL 버튼을 눌러 시연 대상 서버를 설정하면 시작됩니다.
+    </div>
+  </div>
+  <div class="controls">
+    <button id="prev-btn" onclick="prev()">⏪ 이전</button>
+    <button id="next-btn" class="primary" onclick="next()">다음 →</button>
+    <span class="auto">
+      <input type="checkbox" id="auto-toggle" onchange="toggleAuto()">
+      <label for="auto-toggle">자동 진행 (5초)</label>
+    </span>
+    <span class="spacer"></span>
+    <button onclick="restart()">↻ 처음부터</button>
+  </div>
+</footer>
+
+<script>
+  // ========================================================
+  // STEPS — 단계 정의
+  //   각 단계는 어느 iframe에 어떤 path 띄울지 + 토스트 내용
+  // ========================================================
+  const STEPS = [
+    {
+      kind: "info", title: "🏥 의료진 모니터링 대시보드",
+      desc: "외래 5분 전 — 5명 담당 환자의 RED/YELLOW/GREEN 분포가 한눈에. 🔴 4명 RED, 🟢 안정 1명.",
+      admin: "/", focus: "admin",
+    },
+    {
+      kind: "action", title: "📊 C-1042 Pre-Visit Report",
+      desc: "73세 결장암 Oxaliplatin Cycle D14. 신경병증이 7일 연속 3점.",
+      admin: "/patients/C-1042/pre-visit", focus: "admin",
+    },
+    {
+      kind: "result", title: "✅ One-Line Summary 결정론 산출",
+      desc: "결정론 채점이 만든 한 줄 + 7일 추세 + Key Changes + 라이프로그 대조.",
+      admin: "/patients/C-1042/pre-visit", focus: "admin",
+    },
+    {
+      kind: "action", title: "📋 일별 PRO 응답 상세",
+      desc: "환자가 실제로 무엇을 어떻게 답했는지 — 신경병증 1→1→2→2→3→3→3 진행.",
+      admin: "/patients/C-1042/responses", focus: "admin",
+    },
+    {
+      kind: "info", title: "⚙ 환자별 PRO 도구 커스터마이징",
+      desc: "C-3027 폐암 환자. 5개 도구 중 필수/선택 자동 추천 + 의사 미세조정 가능.",
+      admin: "/patients/C-3027/config", focus: "admin",
+    },
+    {
+      kind: "info", title: "📚 PRO 도구 라이브러리",
+      desc: "탑재 가능한 5종 표준 도구 — Evidence Grade·문항·소요·라이선스.",
+      admin: "/tools", focus: "admin",
+    },
+    {
+      kind: "result", title: "🩺 PRO-CTCAE 상세 — 13개 문항",
+      desc: "5증상 × 빈도/강도/일상 방해, 5단계 응답 옵션 미리보기.",
+      admin: "/tools/PRO-CTCAE", focus: "admin",
+    },
+    {
+      kind: "action", title: "🛠 커스텀 PRO 세트 빌더",
+      desc: "기본 도구 ON/OFF + 커스텀 질문 추가. 의사 전용 재사용 템플릿.",
+      admin: "/tools/builder", focus: "admin",
+    },
+    {
+      kind: "result", title: "📋 PRO 세트 변경 이력 가시화",
+      desc: "✅ 활성화 / ❌ 비활성화 / ➕ 추가 / 🔄 빈도 / 🔧 임계값 변경 이벤트로 표시.",
+      admin: "/patients/C-3027/audit", focus: "admin",
+    },
+    {
+      kind: "info", title: "📱 환자앱 홈 — 5명 환자 카드",
+      desc: "각 환자별 푸시 구독 + PRO 시작 + 어르신 모드 진입.",
+      patient: "/", focus: "patient",
+    },
+    {
+      kind: "action", title: "🟢 PRO 시작 — 3가지 모드",
+      desc: "Full / Quick / No-Change — 응답 부담 분산. FN-FLEX 9개 기능.",
+      patient: "/pro/start?patient_id=C-1042", focus: "patient",
+    },
+    {
+      kind: "info", title: "👴 어르신 모드 — 얼굴 척도",
+      desc: "C-4581 (81세). 큰 글씨 + One-Question-One-Screen + 5단계 얼굴.",
+      patient: "/elder/home?patient_id=C-4581", focus: "patient",
+    },
+    {
+      kind: "action", title: "🤖 LLM Free Talk + 4종 가드레일",
+      desc: '아래 빠른 버튼 클릭: 🟢 정상 → 공감 / 🔴 응급 → 119 / 🟡 처방 → 차단.',
+      patient: "/talk", focus: "patient",
+    },
+    {
+      kind: "info", title: "⏰ Cron Jobs — 자동화 워크플로",
+      desc: "Pre-Visit 사전계산 / MCID 자동 푸시 / 미응답 감지 — 수동 트리거 가능.",
+      admin: "/jobs", focus: "admin",
+    },
+    {
+      kind: "result", title: "🎉 시연 종료",
+      desc: "FSD 74개 P0 모두 구현 + 백엔드 90/90 테스트 + 5종 PRO 도구 + 4종 가드레일.",
+      admin: "/", focus: "admin",
+    },
+  ];
+
+  // ========================================================
+  // 상태
+  // ========================================================
+  let urls = JSON.parse(localStorage.getItem("tripro_urls") || "{}");
+  let cur = -1;
+  let autoTimer = null;
+
+  function openModal() {
+    document.getElementById("patient-url").value = urls.patient || "";
+    document.getElementById("admin-url").value = urls.admin || "";
+    document.getElementById("backend-url").value = urls.backend || "";
+    document.getElementById("modal").classList.remove("hide");
+  }
+  function closeModal() {
+    document.getElementById("modal").classList.add("hide");
+  }
+  function saveAndStart() {
+    const p = document.getElementById("patient-url").value.trim().replace(/\/$/, "");
+    const a = document.getElementById("admin-url").value.trim().replace(/\/$/, "");
+    const b = document.getElementById("backend-url").value.trim().replace(/\/$/, "");
+    if (!p || !a) {
+      alert("환자앱·어드민 URL은 필수입니다.");
+      return;
+    }
+    urls = { patient: p, admin: a, backend: b };
+    localStorage.setItem("tripro_urls", JSON.stringify(urls));
+    closeModal();
+    cur = -1;
+    next();
+  }
+
+  // 로컬 프리셋
+  document.getElementById("preset-local").onclick = () => {
+    document.getElementById("patient-url").value = "http://localhost:3000";
+    document.getElementById("admin-url").value = "http://localhost:3001";
+    document.getElementById("backend-url").value = "http://localhost:8000";
+  };
+
+  // ========================================================
+  // 단계 진행
+  // ========================================================
+  function render() {
+    const s = STEPS[cur];
+    if (!s) return;
+
+    document.getElementById("kind-pill").className = "kind " + s.kind;
+    document.getElementById("kind-pill").textContent = s.kind;
+    document.getElementById("step-title").textContent = s.title;
+    document.getElementById("step-desc").textContent = s.desc;
+
+    // iframe 네비게이션
+    if (s.admin !== undefined) {
+      document.getElementById("admin-iframe").src = urls.admin + s.admin;
+      document.getElementById("admin-current").textContent = s.admin;
+    }
+    if (s.patient !== undefined) {
+      document.getElementById("patient-iframe").src = urls.patient + s.patient;
+      document.getElementById("patient-current").textContent = s.patient;
+    }
+
+    // 강조: 활성 iframe 라벨 highlight
+    document.querySelector("#patient-box .iframe-label").classList.toggle(
+      "active", s.focus === "patient");
+    document.querySelector("#admin-box .iframe-label").classList.toggle(
+      "active", s.focus === "admin");
+
+    // 진행률
+    document.getElementById("step-num").textContent = `${cur + 1} / ${STEPS.length}`;
+    document.getElementById("progress-bar").style.width =
+      `${((cur + 1) / STEPS.length) * 100}%`;
+
+    document.getElementById("prev-btn").disabled = cur === 0;
+    document.getElementById("next-btn").disabled = cur === STEPS.length - 1;
+  }
+
+  function next() {
+    if (!urls.patient || !urls.admin) {
+      openModal();
+      return;
+    }
+    if (cur < STEPS.length - 1) cur++;
+    render();
+    scheduleAuto();
+  }
+  function prev() {
+    if (cur > 0) cur--;
+    render();
+  }
+  function restart() {
+    cur = 0;
+    render();
+  }
+  function scheduleAuto() {
+    clearTimeout(autoTimer);
+    if (document.getElementById("auto-toggle").checked && cur < STEPS.length - 1) {
+      autoTimer = setTimeout(next, 5000);
+    }
+  }
+  function toggleAuto() {
+    if (document.getElementById("auto-toggle").checked) scheduleAuto();
+    else clearTimeout(autoTimer);
+  }
+
+  // 키보드 (Space/Enter/N=다음, ←=이전)
+  document.addEventListener("keydown", (e) => {
+    if (document.getElementById("modal").classList.contains("hide")) {
+      if (e.key === " " || e.key === "Enter" || e.key.toLowerCase() === "n") {
+        e.preventDefault(); next();
+      } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "p") {
+        prev();
+      }
+    }
+  });
+
+  // 초기화: URL 없으면 모달, 있으면 첫 단계
+  if (!urls.patient || !urls.admin) {
+    openModal();
+  } else {
+    cur = 0;
+    render();
+  }
+</script>
+
+</body>
+</html>

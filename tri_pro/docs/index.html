@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRI-PRO POC · 문서 인덱스</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --fg: #e2e8f0; --muted: #94a3b8;
+    --brand: #38bdf8; --green: #22c55e; --orange: #f97316;
+    --purple: #a78bfa; --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard",
+                 "Apple SD Gothic Neo", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  header .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--brand);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header h1 {
+    margin: 0 0 12px;
+    font-size: 38px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* 메인 카드 (일반·의료진) — 큼지막하게 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--brand));
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent, var(--brand));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+  .card .icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .card .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .card .desc {
+    color: var(--fg);
+    font-size: 13.5px;
+    margin: 0 0 16px;
+    line-height: 1.55;
+  }
+  .card .meta {
+    color: var(--muted);
+    font-size: 11.5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card .meta span {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .card.general { --accent: var(--brand); }
+  .card.clinical { --accent: var(--green); }
+  .card.demo {
+    --accent: var(--purple);
+    background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(56,189,248,0.08));
+    border: 1px solid rgba(167,139,250,0.4);
+  }
+  .card.demo::before { height: 4px; background: linear-gradient(90deg, var(--brand), var(--purple)); }
+  .card.demo:hover { border-color: var(--purple); transform: translateY(-3px); }
+
+  /* 개발자용 섹션 — 하단 작게 */
+  .dev-section {
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .dev-label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .dev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 10px;
+  }
+  .dev-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .dev-card:hover {
+    border-color: var(--accent, var(--brand));
+    background: rgba(30, 41, 59, 0.85);
+  }
+  .dev-card .dev-icon {
+    font-size: 20px;
+    opacity: 0.7;
+  }
+  .dev-card .dev-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .dev-card .dev-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .dev-card .dev-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .dev-card.commands { --accent: var(--orange); }
+  .dev-card.repo { --accent: var(--purple); }
+
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .footer code {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--brand);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 28px; }
+    .wrap { padding: 40px 18px; }
+    .grid, .dev-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="badge">🩺 TRI-PRO POC · 문서 인덱스</div>
+    <h1>TRI-PRO 환자 보고형 결과 시스템</h1>
+    <p>독자에 맞춰 골라 보세요</p>
+  </header>
+
+  <!-- ⭐ 자동 시연 — 가장 큰 카드 -->
+  <a class="card demo" href="demo.html" style="display: block; margin-bottom: 22px;">
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="font-size: 48px;">🎬</div>
+      <div style="flex: 1;">
+        <div class="subtitle" style="margin-bottom: 6px;">⚡ 인터랙티브 시연</div>
+        <h2 style="font-size: 22px;">15단계 자동 시연 투어 시작</h2>
+        <p class="desc" style="margin-bottom: 8px;">
+          브라우저에서 바로 시연 — 환자앱·어드민이 좌우 양쪽에서 단계별로 자동 이동.
+          토스트로 설명, "다음" 버튼·Space 키·자동진행 5초 모드.
+        </p>
+        <div class="meta">
+          <span>🕐 약 5분</span>
+          <span>📺 iframe 2분할</span>
+          <span>⌨️ Space 키</span>
+          <span>🌐 배포 환경 OK</span>
+        </div>
+      </div>
+      <div style="font-size: 32px; color: var(--brand);">→</div>
+    </div>
+  </a>
+
+  <!-- 메인: 일반인 / 의료진 -->
+  <div class="grid">
+    <a class="card general" href="features.html">
+      <div class="icon">📖</div>
+      <div class="subtitle">일반 안내서</div>
+      <h2>비전공자용 기능 안내서</h2>
+      <p class="desc">
+        의료 전문가가 아니어도 읽을 수 있게 그림과 시나리오로 풀어낸 문서.
+        환자·의사·시스템이 각각 무엇을 하는지, 왜 만들었는지를 전체 흐름부터 설명.
+      </p>
+      <div class="meta">
+        <span>🕐 약 15분</span>
+        <span>👨‍💼 임원·기획·신규 인원</span>
+        <span>📊 ASCII 그림</span>
+      </div>
+    </a>
+
+    <a class="card clinical" href="features_clinical.html">
+      <div class="icon">👨‍⚕️</div>
+      <div class="subtitle">의료진용</div>
+      <h2>임상 통합 가이드</h2>
+      <p class="desc">
+        의료진이 외래 워크플로에 어떻게 통합하는지 — PRO 도구 매트릭스, MCID 알고리즘,
+        Pre-Visit Report 의사결정 분기, 가드레일 정책. FSD §FN- ID 인용.
+      </p>
+      <div class="meta">
+        <span>🕐 약 20분</span>
+        <span>🩺 임상 자문·주치의</span>
+        <span>📋 FSD 인용</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- 개발자용 — 하단 작게 -->
+  <div class="dev-section">
+    <div class="dev-label">개발자·운영자용</div>
+    <div class="dev-grid">
+      <a class="dev-card commands" href="commands.html">
+        <span class="dev-icon">⌨️</span>
+        <div class="dev-text">
+          <div class="dev-title">터미널 명령어 치트시트</div>
+          <div class="dev-desc">셋업·시작·DB 조회·시연·배포·디버깅 60+ 명령</div>
+        </div>
+      </a>
+      <a class="dev-card repo" href="https://github.com/aitrics-adp/poc/tree/main/tri_pro" target="_blank" rel="noopener">
+        <span class="dev-icon">📦</span>
+        <div class="dev-text">
+          <div class="dev-title">GitHub 레포지토리</div>
+          <div class="dev-desc">FastAPI · Next.js · 90/90 tests 통과</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    POC v0.1 · 합성 환자 5명 · LLM Mock 모드<br>
+    문의: <code>jy.jeong@aitrics.com</code> ·
+    Confluence: <code>ADP/Tri PRO MVP</code>
+  </div>
+</div>
+
+</body>
+</html>

@@ -19,13 +19,16 @@
 """
 import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-ADMIN = "http://localhost:3001"
-PATIENT = "http://localhost:3000"
-BACKEND = "http://localhost:8000"
+# URL은 환경변수로 오버라이드 가능 — 배포된 서버 시연 시 사용.
+# 예: ADMIN_URL=https://admin.example.com python demo/demo_full.py
+ADMIN = os.environ.get("ADMIN_URL", "http://localhost:3001")
+PATIENT = os.environ.get("PATIENT_URL", "http://localhost:3000")
+BACKEND = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 # 토스트 색상별 의도
 KIND_COLORS = {
