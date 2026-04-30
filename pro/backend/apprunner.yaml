@@ -1,0 +1,32 @@
+# AWS App Runner — 소스 기반 자동 배포 설정
+# https://docs.aws.amazon.com/apprunner/latest/dg/config-file.html
+#
+# 배포 흐름:
+#   GitHub push → App Runner 자동 감지 → build → 컨테이너 실행
+#
+# Repository에서 사용:
+#   1. App Runner 콘솔 → Create service
+#   2. Source: GitHub → tri-pro-poc 리포 + main 브랜치
+#   3. Deployment trigger: Automatic
+#   4. Configuration source: Configuration file (apprunner.yaml)
+#   5. Source directory: backend
+version: 1.0
+runtime: python3
+build:
+  commands:
+    build:
+      - pip install -r requirements.txt
+run:
+  runtime-version: 3.11
+  command: gunicorn -k uvicorn.workers.UvicornWorker -w 2 --bind 0.0.0.0:8000 --timeout 120 main:app
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: LLM_MODE
+      value: mock
+    - name: VAPID_SUBJECT
+      value: mailto:tri-pro-poc@aitrics.com
+    # 아래는 App Runner 콘솔에서 시크릿으로 등록 (apprunner.yaml에 평문 X)
+    # VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, ANTHROPIC_API_KEY,
+    # CORS_ORIGINS, DATABASE_URL

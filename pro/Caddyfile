@@ -1,0 +1,24 @@
+# Caddy 자동 HTTPS — Let's Encrypt 인증서 자동 발급·갱신.
+# 도메인이 없으면 EC2 Public DNS도 OK (예: ec2-13-209-x-x.ap-northeast-2.compute.amazonaws.com)
+# 또는 nip.io 사용: 13-209-x-x.nip.io (DNS 자동)
+#
+# .env에서 PATIENT_HOST / ADMIN_HOST / API_HOST 환경변수로 도메인 지정.
+
+{$PATIENT_HOST} {
+    reverse_proxy patient:3000
+    encode gzip
+}
+
+{$ADMIN_HOST} {
+    reverse_proxy admin:3001
+    encode gzip
+}
+
+{$API_HOST} {
+    reverse_proxy backend:8000
+    encode gzip
+    @options method OPTIONS
+    handle @options {
+        respond 204
+    }
+}
